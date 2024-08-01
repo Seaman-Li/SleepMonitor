@@ -1,0 +1,114 @@
+{
+  "id": "4635884",
+  "name": "SleepMonitor",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "375705",
+      "name": "搜索",
+      "font_class": "search",
+      "unicode": "e60a",
+      "unicode_decimal": 58890
+    },
+    {
+      "icon_id": "677608",
+      "name": "用户",
+      "font_class": "yonghu",
+      "unicode": "e639",
+      "unicode_decimal": 58937
+    },
+    {
+      "icon_id": "1119364",
+      "name": "用户",
+      "font_class": "yonghu1",
+      "unicode": "e63d",
+      "unicode_decimal": 58941
+    },
+    {
+      "icon_id": "1703529",
+      "name": "搜索",
+      "font_class": "sousuo",
+      "unicode": "e643",
+      "unicode_decimal": 58947
+    },
+    {
+      "icon_id": "4214754",
+      "name": "设置",
+      "font_class": "shezhi",
+      "unicode": "e72d",
+      "unicode_decimal": 59181
+    },
+    {
+      "icon_id": "5928198",
+      "name": "蓝牙",
+      "font_class": "lanya",
+      "unicode": "ec4a",
+      "unicode_decimal": 60490
+    },
+    {
+      "icon_id": "6882970",
+      "name": "历史数据",
+      "font_class": "lishishuju",
+      "unicode": "e60f",
+      "unicode_decimal": 58895
+    },
+    {
+      "icon_id": "8820140",
+      "name": "用户",
+      "font_class": "yonghu2",
+      "unicode": "e6c8",
+      "unicode_decimal": 59080
+    },
+    {
+      "icon_id": "10156402",
+      "name": "设置",
+      "font_class": "shezhi1",
+      "unicode": "e654",
+      "unicode_decimal": 58964
+    },
+    {
+      "icon_id": "10278129",
+      "name": "设置",
+      "font_class": "shezhi2",
+      "unicode": "e60b",
+      "unicode_decimal": 58891
+    },
+    {
+      "icon_id": "11891795",
+      "name": "history",
+      "font_class": "history",
+      "unicode": "e66d",
+      "unicode_decimal": 58989
+    },
+    {
+      "icon_id": "17066693",
+      "name": "蓝牙",
+      "font_class": "lanya1",
+      "unicode": "e636",
+      "unicode_decimal": 58934
+    },
+    {
+      "icon_id": "17228621",
+      "name": "历史记录",
+      "font_class": "lishijilu",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "26847646",
+      "name": "设置",
+      "font_class": "shezhi3",
+      "unicode": "e665",
+      "unicode_decimal": 58981
+    },
+    {
+      "icon_id": "40106837",
+      "name": "寻找设备",
+      "font_class": "xunzhaoshebei",
+      "unicode": "e653",
+      "unicode_decimal": 58963
+    }
+  ]
+}

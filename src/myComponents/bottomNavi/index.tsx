@@ -4,14 +4,15 @@ import DeviceDetectionPage from "../../pages/deviceDetect";
 import UserInfoPage from "../../pages/userInfo";
 import DataHistoryPage from "../../pages/dataHistory";
 import SettingsPage from "../../pages/settings";
+import { StyleSheet } from "react-native";
 
 const myBottomNavi = () => {
     const [index, setIndex] = React.useState(0);
     const [routes] = React.useState([
-      { key: 'deviceDetection', title: 'Connect', icon: 'cellphone-link' },
-      { key: 'userInfo', title: 'User', icon: 'account-circle-outline' },
-      { key: 'dataHistory', title: 'History', icon: 'history' },
-      { key: 'settings', title: 'Settings', icon: 'settings-outline' },
+      { key: 'deviceDetection', title: 'Connect', focusedIcon: 'bluetooth-audio'},
+      { key: 'userInfo', title: 'User', focusedIcon: "account-circle-outline" },
+      { key: 'dataHistory', title: 'History', focusedIcon:"history"   },
+      { key: 'settings', title: 'Settings', focusedIcon:"cog"  },  
     ]);
   
     const renderScene = BottomNavigation.SceneMap({
@@ -30,4 +31,7 @@ const myBottomNavi = () => {
     );
   };
   
+  const styles = StyleSheet.create({
+    
+  });
   export default myBottomNavi;

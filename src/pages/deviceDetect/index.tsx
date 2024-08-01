@@ -1,110 +1,137 @@
 import React, { useState, useEffect } from 'react';
-import { View, FlatList, PermissionsAndroid, Platform, NativeEventEmitter, NativeModules, Text } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, PermissionsAndroid, Platform, Alert } from 'react-native';
 import BleManager from 'react-native-ble-manager';
-import { Button } from 'react-native-paper';
+import { Buffer } from 'buffer';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
-// 定义设备类型
-interface IDevice {
+const BleManagerModule = NativeModules.BleManager;
+const bleManagerEmitter = new NativeEventEmitter(BleManagerModule);
+
+interface Peripheral {
   id: string;
-  name: string | null;
+  name: string;
 }
 
-const DeviceDetectionPage = () => {
-  const [devices, setDevices] = useState<IDevice[]>([]);
+const DeviceDetectionPage: React.FC = () => {
+  const [devices, setDevices] = useState<Map<string, Peripheral>>(new Map());
   const [isScanning, setIsScanning] = useState(false);
-  const [noDevicesFound, setNoDevicesFound] = useState(false);
+  const [connectedDevice, setConnectedDevice] = useState<Peripheral | null>(null);
+  const [listExpanded, setListExpanded] = useState(false);
 
   useEffect(() => {
     BleManager.start({ showAlert: false });
-
-    const bleManagerEmitter = new NativeEventEmitter(NativeModules.BleManager);
+    requestPermissions();
     const subscription = bleManagerEmitter.addListener('BleManagerDiscoverPeripheral', handleDiscoverPeripheral);
-
-    BleManager.checkState();
-
-    return () => {
-      subscription.remove();
-    };
+    return () => subscription.remove();
   }, []);
 
-  const handleDiscoverPeripheral = (peripheral: { id: string; name: string | null }) => {
-    console.log('Discovered new peripheral:', peripheral);
-    if (!devices.some(device => device.id === peripheral.id)) {
-      setDevices(prevDevices => [...prevDevices, { id: peripheral.id, name: peripheral.name }]);
+  const handleDiscoverPeripheral = (peripheral: Peripheral) => {
+    setDevices(prevDevices => {
+      const newDevices = new Map(prevDevices);
+      newDevices.set(peripheral.id, peripheral);
+      return newDevices;
+    });
+  };
+
+  const requestPermissions = async () => {
+    if (Platform.OS === 'android' && Platform.Version >= 23) {
+      await PermissionsAndroid.request(PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION);
     }
   };
 
-  const startScan = async () => {
-    if (isScanning) {
-      console.log('Already scanning...');
-      return;
-    }
-
-    if (Platform.OS === 'android' && Platform.Version >= 31) {
-      const scanPermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
-        {
-          title: "Bluetooth Scan Permission",
-          message: "The app needs access to Bluetooth scanning.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK"
-        }
-      );
-      const connectPermission = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
-        {
-          title: "Bluetooth Connect Permission",
-          message: "The app needs access to connect to Bluetooth devices.",
-          buttonNeutral: "Ask Me Later",
-          buttonNegative: "Cancel",
-          buttonPositive: "OK"
-        }
-      );
-      if (scanPermission !== PermissionsAndroid.RESULTS.GRANTED || connectPermission !== PermissionsAndroid.RESULTS.GRANTED) {
-        console.log('Bluetooth permissions not granted');
-        return;
-      }
-    }
-    scanDevices();
-  };
-
-  const scanDevices = () => {
-    setIsScanning(true);
-    setDevices([]); // Clear the previous devices list
-    setNoDevicesFound(false); // Reset the no devices found flag
-    BleManager.scan([], 5, true)
-      .then(() => {
+  const startScan = () => {
+    if (!isScanning) {
+      setDevices(new Map()); // 清空之前的设备列表
+      setIsScanning(true);
+      setListExpanded(true); // 自动展开列表开始扫描
+      BleManager.scan([], 5, true).then(() => {
         console.log("Scanning...");
-        setTimeout(() => {
-          setIsScanning(false);
-          BleManager.stopScan();
-          if (devices.length === 0) {
-            console.log("No devices found");
-            setNoDevicesFound(true); // Set the flag to show the message
-          }
-        }, 5000);
+        setTimeout(() => setIsScanning(false), 5000);
+      }).catch(err => console.error(err));
+    }
+  };
+
+  const connectToDevice = (peripheral: Peripheral) => {
+    BleManager.connect(peripheral.id)
+      .then(() => {
+        console.log("Connected to " + peripheral.id);
+        setConnectedDevice(peripheral);
+        Alert.alert("Connection Successful", `Connected to ${peripheral.name || peripheral.id}`);
       })
-      .catch(err => {
-        console.error('Scan error:', err);
-        setIsScanning(false);
+      .catch(error => {
+        console.error("Connection error", error);
       });
   };
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Device Detection Page</Text>
-      <Button mode="contained" onPress={startScan}>
-        {isScanning ? 'Scanning...' : 'Scan Bluetooth Devices'}
-      </Button>
-      {noDevicesFound && <Text>No devices found. Please try again.</Text>}
-      <FlatList
-        data={devices}
-        keyExtractor={item => item.id}
-        renderItem={({ item }) => <Text>{item.name || 'Unnamed'} ({item.id})</Text>}
-      />
+    <View style={styles.container}>
+      <TouchableOpacity style={styles.button} onPress={startScan}>
+        <Text style={styles.buttonText}>Scan for Devices</Text>
+      </TouchableOpacity>
+      {connectedDevice && (
+        <Text style={styles.connectedInfo}>Connected to: {connectedDevice.name || connectedDevice.id}</Text>
+      )}
+      {isScanning && <Text>Scanning for devices...</Text>}
+      {listExpanded && (
+        <>
+          <FlatList
+            data={Array.from(devices.values())}
+            keyExtractor={item => item.id}
+            renderItem={({ item }) => (
+              <TouchableOpacity onPress={() => connectToDevice(item)}>
+                <Text style={styles.deviceName}>{item.name || item.id}</Text>
+              </TouchableOpacity>
+            )}
+          />
+          <TouchableOpacity style={styles.toggleButton} onPress={() => setListExpanded(!listExpanded)}>
+            <Text style={styles.toggleButtonText}>{listExpanded ? "Hide Devices" : "Show Devices"}</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
 
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    padding: 20,
+  },
+  button: {
+    padding: 10,
+    backgroundColor: '#1e90ff',
+    marginBottom: 10,
+  },
+  buttonText: {
+    color: '#fff',
+    textAlign: 'center'
+  },
+  deviceName: {
+    padding: 10,
+    fontSize: 18
+  },
+  toggleButton: {
+    padding: 10,
+    backgroundColor: '#007bff',
+    marginTop: 10
+  },
+  toggleButtonText: {
+    color: '#fff',
+    textAlign: 'center'
+  },
+  connectedInfo: {
+    fontSize: 16,
+    marginTop: 10,
+    marginBottom: 5
+  }
+});
+
 export default DeviceDetectionPage;
+
+
+
+
+// const keyExtractor = (item: Peripheral, index: number) => {
+//   // 使用 id 和 index 组合来确保 key 的唯一性
+//   return `${item.id}-${index}`;
+// };

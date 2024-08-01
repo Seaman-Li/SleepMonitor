@@ -8,6 +8,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import LayoutComponent from './src/myComponents/Layout';
+import { PaperProvider } from 'react-native-paper';
 
 
 function App(): React.JSX.Element {
@@ -18,14 +19,17 @@ function App(): React.JSX.Element {
   };
 
   return (
-    <SafeAreaProvider>
-      <SafeAreaView style={{ flex: 1 }}> 
-        <NavigationContainer>
-          <LayoutComponent >
-          </LayoutComponent>
-        </NavigationContainer>
-      </SafeAreaView>
-    </SafeAreaProvider>
+    <PaperProvider>
+      {/* <SafeAreaProvider>
+        <SafeAreaView style={{ flex: 1 }}>  */}
+          <NavigationContainer>
+            <LayoutComponent >
+            </LayoutComponent>
+          </NavigationContainer>
+        {/* </SafeAreaView>
+      </SafeAreaProvider> */}
+    </PaperProvider>
+    
 
   );
 }
